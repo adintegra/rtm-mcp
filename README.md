@@ -34,7 +34,7 @@ All tools return JSON with a `summary` text field for human-readable output alon
 ## Installation
 
 ```bash
-git clone https://github.com/Adintegra/rtm-mcp.git
+git clone https://github.com/adintegra/rtm-mcp.git
 cd rtm-mcp
 uv sync
 ```
@@ -105,12 +105,27 @@ Or verify the tools are registered:
 
 ```bash
 uv run python -c "
+import asyncio
 from rtm_mcp.server import mcp
-tools = mcp._tool_manager._tools
-for name in tools:
-    print(f'  {name}')
+for t in asyncio.run(mcp.list_tools()):
+    print(f'  {t.name}')
 "
 ```
+
+## Development
+
+```bash
+uv sync                       # install runtime + dev dependencies
+uv run pytest                 # run the tests (no network or RTM account needed)
+uv run ruff check .           # lint
+uv run ruff format .          # format
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow. Security issues: see
+[SECURITY.md](SECURITY.md).
+
+> **Note:** the `mcp` dependency is pinned to `>=1.27,<2`. mcp 2.x renames `FastMCP` to
+> `MCPServer` and changes other APIs; migrating is planned but not done yet.
 
 ## Architecture
 
@@ -144,8 +159,9 @@ The codebase is structured as a clean separation of concerns:
 
 ## Origin
 
-This project started as a CLI tool used in an [OpenClaw](https://openclaw.ai) agent workspace, with an n8n wrapper for workflow automation. The MCP server extracts and refactors that logic into a clean, importable library.
+This project started as a personal CLI tool for scheduling RTM tasks around calendar availability,
+and was refactored into a reusable MCP server.
 
 ## License
 
-MIT
+[MIT](LICENSE)
