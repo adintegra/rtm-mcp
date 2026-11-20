@@ -3,7 +3,7 @@ name = "rtm-mcp"
 version = "0.1.0"
 description = "MCP server for Remember The Milk task planning with calendar awareness"
 requires-python = ">=3.11"
-dependencies = ["mcp>=1.0"]
+dependencies = ["mcp>=1.27,<2"]
 
 [project.scripts]
 rtm-mcp = "rtm_mcp.server:main"
