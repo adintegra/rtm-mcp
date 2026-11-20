@@ -2,11 +2,32 @@
 name = "rtm-mcp"
 version = "0.1.0"
 description = "MCP server for Remember The Milk task planning with calendar awareness"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Mark Kunzmann" }]
+keywords = ["mcp", "model-context-protocol", "remember-the-milk", "rtm", "calendar", "task-planning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 requires-python = ">=3.11"
+# mcp 2.x removed mcp.server.fastmcp (FastMCP -> MCPServer); stay on 1.x until migrated.
 dependencies = ["mcp>=1.27,<2"]
+
+[project.urls]
+Homepage = "https://github.com/adintegra/rtm-mcp"
+Issues = "https://github.com/adintegra/rtm-mcp/issues"
 
 [project.scripts]
 rtm-mcp = "rtm_mcp.server:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.8"]
 
 [build-system]
 requires = ["hatchling"]
@@ -14,3 +35,14 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rtm_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

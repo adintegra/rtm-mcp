@@ -18,6 +18,7 @@ from .models import DayCapacity, FreeBlock
 # Configuration (from env vars with sensible defaults)
 # ---------------------------------------------------------------------------
 
+
 def _tz() -> ZoneInfo:
     return ZoneInfo(os.environ.get("RTM_TZ", "Europe/Zurich"))
 
@@ -42,6 +43,7 @@ def _calendar_url() -> str:
 # Public helpers (used by planner and server)
 # ---------------------------------------------------------------------------
 
+
 def get_tz() -> ZoneInfo:
     """Return the configured timezone."""
     return _tz()
@@ -65,6 +67,7 @@ def get_focus_block() -> int:
 # ---------------------------------------------------------------------------
 # ICS parsing
 # ---------------------------------------------------------------------------
+
 
 def _read_url(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "rtm-mcp/1.0"})
@@ -159,6 +162,7 @@ def _extract_busy_intervals(ics_text: str) -> list[tuple[datetime, datetime]]:
 # Interval arithmetic
 # ---------------------------------------------------------------------------
 
+
 def merge_intervals(
     intervals: list[tuple[datetime, datetime]],
 ) -> list[tuple[datetime, datetime]]:
@@ -209,6 +213,7 @@ def _subtract_intervals(
 # Work windows & capacity
 # ---------------------------------------------------------------------------
 
+
 def _parse_work_windows(spec: str) -> list[tuple[time, time]]:
     out: list[tuple[time, time]] = []
     for part in spec.split(","):
@@ -226,10 +231,12 @@ def _day_work_windows(d: date) -> list[tuple[datetime, datetime]]:
     tz = _tz()
     windows: list[tuple[datetime, datetime]] = []
     for a, b in _parse_work_windows(_work_windows_spec()):
-        windows.append((
-            datetime.combine(d, a, tzinfo=tz),
-            datetime.combine(d, b, tzinfo=tz),
-        ))
+        windows.append(
+            (
+                datetime.combine(d, a, tzinfo=tz),
+                datetime.combine(d, b, tzinfo=tz),
+            )
+        )
     return windows
 
 
@@ -275,13 +282,12 @@ def capacity_for_day(
 # Public entry points
 # ---------------------------------------------------------------------------
 
+
 def fetch_busy_intervals() -> list[tuple[datetime, datetime]]:
     """Fetch and merge busy intervals from the configured ICS calendar feed."""
     url = _calendar_url()
     if not url:
-        raise RuntimeError(
-            "No calendar URL configured. Set RTM_CALENDAR_ICS_URL."
-        )
+        raise RuntimeError("No calendar URL configured. Set RTM_CALENDAR_ICS_URL.")
     ics_text = _read_url(url)
     return merge_intervals(_extract_busy_intervals(ics_text))
 
