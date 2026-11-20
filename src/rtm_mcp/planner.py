@@ -26,10 +26,10 @@ from .rtm_client import (
     timeline_create,
 )
 
-
 # ---------------------------------------------------------------------------
 # Date helpers
 # ---------------------------------------------------------------------------
+
 
 def _rtm_due_local_date(due_iso: str) -> date | None:
     """Convert an RTM due date (UTC ISO string) to a local date."""
@@ -78,6 +78,7 @@ def _sort_pool(tasks: list[RTMTask]) -> list[RTMTask]:
 # Plan
 # ---------------------------------------------------------------------------
 
+
 def plan_tasks(days: int = 5) -> PlanResult:
     """Plan tasks into available calendar slots.
 
@@ -122,28 +123,32 @@ def plan_tasks(days: int = 5) -> PlanResult:
             if t.estimate_min <= (available - used):
                 original = _rtm_due_local_date(t.due_iso)
                 delta = (d - original).days if original else None
-                day_tasks.append(PlanAssignment(
-                    task=t,
-                    assigned_date=d,
-                    original_due=original,
-                    delta_days=delta,
-                ))
+                day_tasks.append(
+                    PlanAssignment(
+                        task=t,
+                        assigned_date=d,
+                        original_due=original,
+                        delta_days=delta,
+                    )
+                )
                 used += t.estimate_min
                 remaining.pop(i)
             else:
                 i += 1
 
-        day_summaries.append(DaySummary(
-            day=d,
-            meeting_count=cap.meeting_count,
-            free_minutes=cap.free_minutes,
-            fixed_minutes=fixed_used,
-            planned_minutes=used,
-            leftover_minutes=cap.free_minutes - fixed_used - used,
-            free_blocks=cap.free_blocks,
-            fixed_tasks=fixed_today,
-            assigned_tasks=day_tasks,
-        ))
+        day_summaries.append(
+            DaySummary(
+                day=d,
+                meeting_count=cap.meeting_count,
+                free_minutes=cap.free_minutes,
+                fixed_minutes=fixed_used,
+                planned_minutes=used,
+                leftover_minutes=cap.free_minutes - fixed_used - used,
+                free_blocks=cap.free_blocks,
+                fixed_tasks=fixed_today,
+                assigned_tasks=day_tasks,
+            )
+        )
 
         planned_count += 1
         d += timedelta(days=1)
@@ -159,6 +164,7 @@ def plan_tasks(days: int = 5) -> PlanResult:
 # ---------------------------------------------------------------------------
 # Apply
 # ---------------------------------------------------------------------------
+
 
 def apply_plan(days: int = 5) -> list[ChangeRecord]:
     """Run the planner and write new due dates back to RTM.
@@ -178,11 +184,13 @@ def apply_plan(days: int = 5) -> list[ChangeRecord]:
                 continue  # no change needed
             task_set_due_date(timeline, task, new_due)
             delta = (new_due - old_due).days if old_due else 0
-            changes.append(ChangeRecord(
-                task_name=task.name,
-                old_due=old_due,
-                new_due=new_due,
-                delta_days=delta,
-            ))
+            changes.append(
+                ChangeRecord(
+                    task_name=task.name,
+                    old_due=old_due,
+                    new_due=new_due,
+                    delta_days=delta,
+                )
+            )
 
     return changes

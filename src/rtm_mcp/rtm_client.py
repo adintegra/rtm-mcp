@@ -43,8 +43,7 @@ def _get_config() -> tuple[str, str, str]:
         if not token:
             missing.append("RTM_AUTH_TOKEN (or RTM_TOKEN_FILE)")
         raise RuntimeError(
-            f"Missing RTM credentials: {', '.join(missing)}. "
-            "Set them as environment variables."
+            f"Missing RTM credentials: {', '.join(missing)}. Set them as environment variables."
         )
 
     return api_key, secret, token

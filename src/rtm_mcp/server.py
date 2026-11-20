@@ -12,12 +12,18 @@ Tools:
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-from .calendar import compute_capacity, get_focus_block, get_meeting_buffer, get_tz, get_work_windows_spec
-from .models import ChangeRecord, DayCapacity, DaySummary, PlanResult
+from .calendar import (
+    compute_capacity,
+    get_focus_block,
+    get_meeting_buffer,
+    get_tz,
+    get_work_windows_spec,
+)
+from .models import ChangeRecord, DayCapacity, PlanResult
 from .planner import apply_plan, plan_tasks
 from .rtm_client import fetch_tasks_all
 
@@ -75,26 +81,25 @@ def _format_capacity(caps: list[DayCapacity]) -> tuple[str, list[dict]]:
 
     for cap in caps:
         blocks_str = ", ".join(
-            f"{b.start.strftime('%H:%M')}-{b.end.strftime('%H:%M')}"
-            for b in cap.free_blocks
+            f"{b.start.strftime('%H:%M')}-{b.end.strftime('%H:%M')}" for b in cap.free_blocks
         )
         lines.append(
-            f"{cap.day.isoformat()}  "
-            f"meetings: {cap.meeting_count}, "
-            f"free: {cap.free_minutes}m"
+            f"{cap.day.isoformat()}  meetings: {cap.meeting_count}, free: {cap.free_minutes}m"
         )
         if blocks_str:
             lines.append(f"  blocks: {blocks_str}")
 
-        json_days.append({
-            "date": cap.day.isoformat(),
-            "free_minutes": cap.free_minutes,
-            "meeting_count": cap.meeting_count,
-            "free_blocks": [
-                {"start": b.start.isoformat(), "end": b.end.isoformat(), "minutes": b.minutes}
-                for b in cap.free_blocks
-            ],
-        })
+        json_days.append(
+            {
+                "date": cap.day.isoformat(),
+                "free_minutes": cap.free_minutes,
+                "meeting_count": cap.meeting_count,
+                "free_blocks": [
+                    {"start": b.start.isoformat(), "end": b.end.isoformat(), "minutes": b.minutes}
+                    for b in cap.free_blocks
+                ],
+            }
+        )
 
     summary = "\n".join(lines)
     return summary, json_days
@@ -121,8 +126,7 @@ def _format_plan(result: PlanResult) -> tuple[str, dict]:
         )
 
         blocks_str = ", ".join(
-            f"{b.start.strftime('%H:%M')}-{b.end.strftime('%H:%M')}"
-            for b in ds.free_blocks
+            f"{b.start.strftime('%H:%M')}-{b.end.strftime('%H:%M')}" for b in ds.free_blocks
         )
         if blocks_str:
             lines.append(f"  free blocks: {blocks_str}")
@@ -146,11 +150,13 @@ def _format_plan(result: PlanResult) -> tuple[str, dict]:
             lines.append("  Fixed (nomove) tasks:")
             for t in ds.fixed_tasks:
                 lines.append(f"    [{_pri(t.priority)}] {t.estimate_min}m  {t.name}")
-                day_json["fixed_tasks"].append({
-                    "name": t.name,
-                    "priority": t.priority,
-                    "estimate_min": t.estimate_min,
-                })
+                day_json["fixed_tasks"].append(
+                    {
+                        "name": t.name,
+                        "priority": t.priority,
+                        "estimate_min": t.estimate_min,
+                    }
+                )
 
         if ds.assigned_tasks:
             lines.append("  Rescheduled tasks:")
@@ -167,14 +173,16 @@ def _format_plan(result: PlanResult) -> tuple[str, dict]:
                     f"{a.task.name}  "
                     f"was: {old_s} -> {a.assigned_date.isoformat()}{delta_s}"
                 )
-                day_json["assigned_tasks"].append({
-                    "name": a.task.name,
-                    "priority": a.task.priority,
-                    "estimate_min": a.task.estimate_min,
-                    "original_due": old_s,
-                    "new_due": a.assigned_date.isoformat(),
-                    "delta_days": a.delta_days,
-                })
+                day_json["assigned_tasks"].append(
+                    {
+                        "name": a.task.name,
+                        "priority": a.task.priority,
+                        "estimate_min": a.task.estimate_min,
+                        "original_due": old_s,
+                        "new_due": a.assigned_date.isoformat(),
+                        "delta_days": a.delta_days,
+                    }
+                )
 
         if not ds.fixed_tasks and not ds.assigned_tasks:
             lines.append("  (no tasks fit or no capacity)")
@@ -210,15 +218,15 @@ def _format_changes(changes: list[ChangeRecord]) -> tuple[str, list[dict]]:
     for c in changes:
         old_s = c.old_due.isoformat() if c.old_due else "?"
         sign = "+" if c.delta_days > 0 else ""
-        lines.append(
-            f"  {c.task_name}: {old_s} -> {c.new_due.isoformat()} ({sign}{c.delta_days}d)"
+        lines.append(f"  {c.task_name}: {old_s} -> {c.new_due.isoformat()} ({sign}{c.delta_days}d)")
+        json_list.append(
+            {
+                "name": c.task_name,
+                "old_due": old_s,
+                "new_due": c.new_due.isoformat(),
+                "delta_days": c.delta_days,
+            }
         )
-        json_list.append({
-            "name": c.task_name,
-            "old_due": old_s,
-            "new_due": c.new_due.isoformat(),
-            "delta_days": c.delta_days,
-        })
 
     summary = "\n".join(lines)
     return summary, json_list
@@ -227,6 +235,7 @@ def _format_changes(changes: list[ChangeRecord]) -> tuple[str, list[dict]]:
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def list_tasks(
@@ -249,9 +258,11 @@ def list_tasks(
     }
 
     if filter not in rtm_filters:
-        return json.dumps({
-            "error": f"Unknown filter '{filter}'. Use: all, today, week, overdue",
-        })
+        return json.dumps(
+            {
+                "error": f"Unknown filter '{filter}'. Use: all, today, week, overdue",
+            }
+        )
 
     try:
         tasks = fetch_tasks_all(rtm_filters[filter])
@@ -265,9 +276,7 @@ def list_tasks(
     lines = [f"{len(tasks)} {filter} task(s):", ""]
     for t in tasks:
         est_s = f"{t['estimate_min']}m" if t["estimate_min"] else "no est."
-        lines.append(
-            f"  [{_pri(t['priority'])}] {_due_str(t['due'])}  {t['name']}  ({est_s})"
-        )
+        lines.append(f"  [{_pri(t['priority'])}] {_due_str(t['due'])}  {t['name']}  ({est_s})")
 
     summary = "\n".join(lines)
     return json.dumps({"summary": summary, "tasks": tasks, "count": len(tasks)})
@@ -293,10 +302,15 @@ def plan(days: int = 5) -> str:
         return json.dumps({"error": str(e)})
 
     if not result.days:
-        return json.dumps({
-            "summary": "No schedulable tasks found (need incomplete tasks with estimates and due dates).",
-            "days": [],
-        })
+        return json.dumps(
+            {
+                "summary": (
+                    "No schedulable tasks found "
+                    "(need incomplete tasks with estimates and due dates)."
+                ),
+                "days": [],
+            }
+        )
 
     summary, json_data = _format_plan(result)
     return json.dumps({"summary": summary, **json_data})
@@ -315,10 +329,12 @@ def apply(days: int = 5, confirm: bool = False) -> str:
         confirm: Safety flag -- must be true to write changes.
     """
     if not confirm:
-        return json.dumps({
-            "error": "Refused: confirm must be true. Run 'plan' first to preview, "
-                     "then call apply with confirm=true.",
-        })
+        return json.dumps(
+            {
+                "error": "Refused: confirm must be true. Run 'plan' first to preview, "
+                "then call apply with confirm=true.",
+            }
+        )
 
     try:
         changes = apply_plan(days)
@@ -352,6 +368,7 @@ def capacity(days: int = 5) -> str:
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
+
 
 def main():
     """Run the MCP server (stdio transport)."""
