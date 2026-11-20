@@ -1,0 +1,29 @@
+name: Bug report
+description: Something isn't working as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Tool called, arguments, relevant (redacted) config such as RTM_WORK_WINDOWS.
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, MCP client (Claude Desktop, etc.)
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste API keys, tokens, or private calendar URLs.** Redact them from logs.
