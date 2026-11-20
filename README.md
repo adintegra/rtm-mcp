@@ -125,7 +125,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow. Security issues: s
 [SECURITY.md](SECURITY.md).
 
 > **Note:** the `mcp` dependency is pinned to `>=1.27,<2`. mcp 2.x renames `FastMCP` to
-> `MCPServer` and changes other APIs; migrating is planned but not done yet.
+> `MCPServer` and changes other APIs; the migration has not been done yet.
 
 ## Architecture
 
